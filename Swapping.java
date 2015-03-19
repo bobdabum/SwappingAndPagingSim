@@ -6,62 +6,77 @@ public class Swapping {
 	private static final int MAX_DURATION = 5;
 	private static final int NUM_PROCESSES = 100;
 	private static final int NUM_RUNS = 5;
+	private static final int NUM_SECS = 60;
 	private static final int SIZE_MEMORY = 100;
 	private static final int RAND_SEED = 0;
 	private static Process[] pList = new Process[NUM_PROCESSES];
 	private static ArrayList<Process> pInMemList = new ArrayList<Process>(NUM_PROCESSES);
 
 	public static void main(String args[]){
-		int numProcess = 0;
-		for(int i = 0; i < NUM_RUNS; i++)
-		{
-			initialize(i);
-			numProcess += runFF();
-		}
-		System.out.println("Average number of processes processed: "+((double)numProcess/NUM_RUNS));
-		numProcess = 0;
-		for(int i = 0; i < NUM_RUNS; i++)
-		{
-			initialize(i);
-			numProcess += runNF();
-		}
-		System.out.println("Average number of processes processed: "+((double)numProcess/NUM_RUNS));
-		numProcess = 0;
-		for(int i = 0; i < NUM_RUNS; i++)
-		{
-			initialize(i);
-			numProcess += runBF();
-		}
-		System.out.println("Average number of processes processed: "+((double)numProcess/NUM_RUNS));
-		numProcess = 0;
-		for(int i = 0; i < NUM_RUNS; i++)
-		{
-			initialize(i);
-			numProcess += runWF();
-		}
-		System.out.println("Average number of processes processed: "+((double)numProcess/NUM_RUNS));
-		numProcess = 0;
+		runFF(false);
+		runFF(true);
+		
+		runNF(false);
+		runNF(false);
+		
+		runBF(false);
+		runBF(true);
+		
+		runWF(false);
+		runWF(true);
 	}
 	private static void initialize(int run){
 		Random r = new Random(RAND_SEED+run);
 		for(int i = 0; i< NUM_PROCESSES; i++)
 			pList[i] = new Process(i,PROCESS_SIZES[r.nextInt(PROCESS_SIZES.length)],1+r.nextInt(MAX_DURATION));
 	}
-	private static int runFF(){
-		reset();
-		return 0;
+	private static void runFF(boolean compaction){
+		int numProcesses = 0;
+		for(int i = 0; i < NUM_RUNS; i++)
+		{
+			initialize(i);
+			for(int j=0;j<NUM_SECS;j++){
+				reset();
+				//TODO FINISH REST
+			}
+		}
+		System.out.println("Average number of processes processed: "+((double)numProcesses/NUM_RUNS));
 	}
-	private static int runNF(){
-		reset();
-		return 0;
+	private static void runNF(boolean compaction){
+		int numProcesses = 0;
+		for(int i = 0; i < NUM_RUNS; i++)
+		{
+			initialize(i);
+			for(int j=0;j<NUM_SECS;j++){
+				reset();
+				//TODO FINISH REST
+			}
+		}
+		System.out.println("Average number of processes processed: "+((double)numProcesses/NUM_RUNS));
 	}
-	private static int runBF(){
-		reset();
-		return 0;
+	private static void runBF(boolean compaction){
+		int numProcesses = 0;
+		for(int i = 0; i < NUM_RUNS; i++)
+		{
+			initialize(i);
+			for(int j=0;j<NUM_SECS;j++){
+				reset();
+				//TODO FINISH REST
+			}
+		}
+		System.out.println("Average number of processes processed: "+((double)numProcesses/NUM_RUNS));
 	}
-	private static int runWF(){
-		reset();
-		return 0;
+	private static void runWF(boolean compaction){
+		int numProcesses = 0;
+		for(int i = 0; i < NUM_RUNS; i++)
+		{
+			initialize(i);
+			for(int j=0;j<NUM_SECS;j++){
+				reset();
+				//TODO FINISH REST
+			}
+		}
+		System.out.println("Average number of processes processed: "+((double)numProcesses/NUM_RUNS));
 	}
 	private static void reset(){
 		pInMemList = new ArrayList<Process>(NUM_PROCESSES);      
@@ -91,5 +106,12 @@ public class Swapping {
 			toPrint += ".";
 		
 		System.out.println(toPrint);
+	}
+	private static void compact(){
+		int newIndex = 0;
+		for(Process p: pInMemList){
+			p.setIndex(newIndex);
+			newIndex += p.size;
+		}
 	}
 }
