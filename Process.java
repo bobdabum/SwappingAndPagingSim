@@ -9,7 +9,7 @@ public class Process implements Comparable<Process>{
 	public void setIndex(int index) {
 		this.index = index;
 	}
-	public boolean timeRunning(){
+	public boolean run(){
 		timeRunning++;
 		return (timeRunning==duration);
 	}
