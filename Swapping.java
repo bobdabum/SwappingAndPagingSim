@@ -16,7 +16,7 @@ public class Swapping {
 	public static void main(String args[]){
 		runFF(false);
 		runFF(true);
-		/*
+		
 		runNF(false);
 		runNF(false);
 
@@ -25,7 +25,7 @@ public class Swapping {
 
 		runWF(false);
 		runWF(true);
-		*/
+		
 	}
 	private static void reset(int run){
 		pInMemList = new ArrayList<Process>(NUM_PROCESSES);
