@@ -22,11 +22,6 @@ public class Paging {
 
 		missTot = 0;
 		for(int i=0;i<NUM_RUNS;i++)
-			missTot+= runLRU(RAND_SEED+i);
-		System.out.println("Number of misses:"+missTot+" Miss Rate:"+((double)missTot/((double)(NUM_REFS*NUM_RUNS))));
-
-		missTot = 0;
-		for(int i=0;i<NUM_RUNS;i++)
 			missTot+= runLFU(RAND_SEED+i);
 		System.out.println("Number of misses:"+missTot+" Miss Rate:"+((double)missTot/((double)(NUM_REFS*NUM_RUNS))));
 
@@ -167,10 +162,10 @@ public class Paging {
 				}
 				else{
 					toReplace = r.nextInt(NUM_PAGES_MEMORY);
-				}				
+				}
+				System.out.println("Page Fault: "+ref+" not found. Replacing page: "+pages[toReplace]+".");				
 				numMisses++;
 				pages[toReplace] = ref;
-				System.out.println("Page Fault: "+ref+" not found. Replacing page: "+pages[toReplace]+".");
 			}
 			ref = getNextReference(ref, r);
 		}

@@ -12,6 +12,8 @@ public class Swapping {
 	private static final int RAND_SEED = 0;
 	private static ArrayList<Process> pList = new ArrayList<Process>(NUM_PROCESSES);
 	private static ArrayList<Process> pInMemList = new ArrayList<Process>(NUM_PROCESSES);
+	
+	private static boolean printTrack = false;
 
 	public static void main(String args[]){
 		runFF(false);
@@ -55,9 +57,14 @@ public class Swapping {
 					// If there are no programs in memory put it at the beginning.
 					if(pInMemList.size()==0){
 						pList.get(0).index = 0;
+						char currLetter = (char)(65 + pList.get(0).pNum%26);
+						System.out.println("Swapping process into memory. Process Name: "+currLetter+", Size: "+pList.get(0).size+ ", Duration: "+pList.get(0).duration);
 						pInMemList.add(pList.remove(0));
 						addedProcess = true;
 						Collections.sort(pInMemList);
+						//TODO print
+						printPInMemList("Running FF(compaction="+compaction+") Run "+run+" Second "+sec);
+						printTrack = false;
 					}
 					else{
 						boolean holeFound = false;
@@ -86,14 +93,28 @@ public class Swapping {
 						}
 						if(holeFound){
 							pList.get(0).index = holeIndex;
+							char currLetter = (char)(65 + pList.get(0).pNum%26);
+							System.out.println("Swapping process into memory. Process Name: "+currLetter+", Size: "+pList.get(0).size+ ", Duration: "+pList.get(0).duration);
 							pInMemList.add(pList.remove(0));
+							
 							addedProcess = true;
 							Collections.sort(pInMemList);
+							//TODO print
+							printPInMemList("Running FF(compaction="+compaction+") Run "+run+" Second "+sec);
+							printTrack = false;
+						}
+						else if(printTrack) {
+							//TODO print if process was removed
+							printPInMemList("Running FF(compaction="+compaction+") Run "+run+" Second "+sec);
 						}
 					}
-				}					
-				printPInMemList("Running FF(compaction="+compaction+") Run "+run+" Second "+sec);				
+				}
+				//TODO make the bool false so that when loop runs again it will reset
+				printTrack=false;
+				//printPInMemList("Running FF(compaction="+compaction+") Run "+run+" Second "+sec);				
 			}
+			//TODO Clarify
+			System.out.println("Run "+run+" has ended \n \n");
 		}
 		System.out.println("Average number of processes processed: "+((double)numProcesses/NUM_RUNS));
 	}
@@ -123,10 +144,15 @@ public class Swapping {
 					compact();
 
 				//adds processes to pMemList
-				addProcessToSmallestHole();
+				addProcessToSmallestHole(compaction, run, sec);
+				
+				//TODO Change printTrack bool
+				printTrack = false;
 
-				printPInMemList("Running BF(compaction="+compaction+") Run "+run+" Second "+sec);
+				//printPInMemList("Running BF(compaction="+compaction+") Run "+run+" Second "+sec);
 			}
+			//TODO Clarify
+			System.out.println("Run "+run+" has ended \n \n");
 		}
 		System.out.println("Average number of processes processed: "+((double)numProcesses/NUM_RUNS));
 	}
@@ -144,10 +170,14 @@ public class Swapping {
 					compact();
 
 				//adds processes to pMemList
-				addProcessToLargestHole();
+				addProcessToLargestHole(compaction, run, sec);
 
-				printPInMemList("Running WF(compaction="+compaction+") Run "+run+" Second "+sec);
+				//TODO Change printTrack bool
+				printTrack = false;
+				//printPInMemList("Running WF(compaction="+compaction+") Run "+run+" Second "+sec);
 			}
+			//TODO Clarify
+			System.out.println("Run "+run+" has ended \n \n");
 		}
 		System.out.println("Average number of processes processed: "+((double)numProcesses/NUM_RUNS));
 	}
@@ -191,12 +221,14 @@ public class Swapping {
 				pInMemList.remove(k);
 				numProcesses++;
 				k--;
+				//TODO Print?
+				printTrack = true;
 			}
 		}
 		Collections.sort(pInMemList);
 		return numProcesses;	
 	}
-	private static void addProcessToSmallestHole(){
+	private static void addProcessToSmallestHole(boolean compaction, int run, int sec){
 		//Adds processes until can't add first in queue
 		boolean addedProcess = true;
 		while(addedProcess){
@@ -204,7 +236,12 @@ public class Swapping {
 
 			if(pInMemList.size()==0){
 				pList.get(0).index = 0;
+				char currLetter = (char)(65 + pList.get(0).pNum%26);
+				System.out.println("Swapping process into memory. Process Name: "+currLetter+", Size: "+pList.get(0).size+ ", Duration: "+pList.get(0).duration);
 				pInMemList.add(pList.remove(0));
+				//TODO Print
+				printPInMemList("Running BF(compaction="+compaction+") Run "+run+" Second "+sec);
+				printTrack = false;
 				addedProcess = true;
 				Collections.sort(pInMemList);
 			}
@@ -233,14 +270,23 @@ public class Swapping {
 
 				if(holeFound){
 					pList.get(0).index = holeIndex;
+					char currLetter = (char)(65 + pList.get(0).pNum%26);
+					System.out.println("Swapping process into memory. Process Name: "+currLetter+", Size: "+pList.get(0).size+ ", Duration: "+pList.get(0).duration);
 					pInMemList.add(pList.remove(0));
 					addedProcess = true;
 					Collections.sort(pInMemList);
+					//TODO print
+					printPInMemList("Running BF(compaction="+compaction+") Run "+run+" Second "+sec);
+					printTrack = false;
+				}
+				//TODO print if process was removed from memory
+				else if(printTrack){
+					printPInMemList("Running BF(compaction="+compaction+") Run "+run+" Second "+sec);
 				}
 			}
 		}
 	}
-	private static void addProcessToLargestHole(){
+	private static void addProcessToLargestHole(boolean compaction, int run, int sec){
 		//Adds processes until can't add first in queue
 		boolean addedProcess = true;
 		while(addedProcess){
@@ -248,9 +294,14 @@ public class Swapping {
 
 			if(pInMemList.size()==0){
 				pList.get(0).index = 0;
+				char currLetter = (char)(65 + pList.get(0).pNum%26);
+				System.out.println("Swapping process into memory. Process Name: "+currLetter+", Size: "+pList.get(0).size+ ", Duration: "+pList.get(0).duration);
 				pInMemList.add(pList.remove(0));
 				addedProcess = true;
 				Collections.sort(pInMemList);
+				//TODO print
+				printPInMemList("Running WF(compaction="+compaction+") Run "+run+" Second "+sec);
+				printTrack = false;
 			}
 			else{
 				boolean holeFound = false;
@@ -277,9 +328,18 @@ public class Swapping {
 
 				if(holeFound){
 					pList.get(0).index = holeIndex;
+					char currLetter = (char)(65 + pList.get(0).pNum%26);
+					System.out.println("Swapping process into memory. Process Name: "+currLetter+", Size: "+pList.get(0).size+ ", Duration: "+pList.get(0).duration);
 					pInMemList.add(pList.remove(0));
 					addedProcess = true;
 					Collections.sort(pInMemList);
+					//TODO print
+					printPInMemList("Running WF(compaction="+compaction+") Run "+run+" Second "+sec);
+					printTrack = false;
+				}
+				else if(printTrack) {
+					//TODO print if process was removed from memory
+					printPInMemList("Running WF(compaction="+compaction+") Run "+run+" Second "+sec);
 				}
 			}
 		}
