@@ -102,8 +102,82 @@ public class Swapping {
 		for(int run = 0; run < NUM_RUNS; run++)
 		{
 			reset(run);
-			for(int j=0;j<NUM_SECS;j++){
-				//TODO FINISH REST
+			for(int sec=0;sec<NUM_SECS;sec++){
+				//Runs and removes finished processes
+				numProcesses = runAllProcesses(numProcesses);
+
+				//compacts if at second 30
+				if (compaction && sec == 30)
+					compact();
+
+				//adds processes to pMemList
+				//Adds processes until can't add first in queue
+				boolean addedProcess = true;
+				// This is the index of the last search.
+				int currIndex = 0;
+				while(addedProcess){
+					addedProcess = false;
+					// If there are no programs in memory put it at the beginning.
+					if(pInMemList.size()==0){
+						pList.get(0).index = 0;
+						pInMemList.add(pList.remove(0));
+						addedProcess = true;
+						Collections.sort(pInMemList);
+					}
+					else{
+						boolean holeFound = false;
+						int holeIndex = 0;
+						int lastIndex = 0;
+						//Finds next large enough hole between processes starting from last search index.
+						for(Process p:pInMemList){
+							if(!holeFound)
+							{
+								if(p.index > currIndex)
+								{
+									int hole = p.index - lastIndex;
+									if(hole >= pList.get(0).size){
+										holeFound = true;
+										holeIndex = lastIndex;
+									}
+								}
+								lastIndex = p.index+p.size;
+							}
+						}
+						if(!holeFound)
+						{
+							//Finds hole between the last process and the end
+							int hole = SIZE_MEMORY - 1 - lastIndex;
+							if(hole >= pList.get(0).size){
+								holeFound = true;
+								holeIndex = lastIndex;
+							}
+							// Goes back to the start and finds next large enough hole between start and the last search index.
+							lastIndex = 0;
+							for(Process p:pInMemList){
+								if(!holeFound)
+								{
+									if(p.index <= currIndex)
+									{
+										hole = p.index - lastIndex;
+										if(hole >= pList.get(0).size){
+											holeFound = true;
+											holeIndex = lastIndex;
+										}
+									}
+									lastIndex = p.index+p.size;
+								}
+							}
+						}
+						if(holeFound){
+							currIndex = holeIndex;
+							pList.get(0).index = holeIndex;
+							pInMemList.add(pList.remove(0));
+							addedProcess = true;
+							Collections.sort(pInMemList);
+						}
+					}
+				}					
+				printPInMemList("Running NF(compaction="+compaction+") Run "+run+" Second "+sec);	
 			}
 		}
 		System.out.println("Average number of processes processed: "+((double)numProcesses/NUM_RUNS));
