@@ -16,16 +16,16 @@ public class Swapping {
 	public static void main(String args[]){
 		runFF(false);
 		runFF(true);
-		
+
 		runNF(false);
-		runNF(false);
+		runNF(true);
 
 		runBF(false);
 		runBF(true);
 
 		runWF(false);
 		runWF(true);
-		
+
 	}
 	private static void reset(int run){
 		pInMemList = new ArrayList<Process>(NUM_PROCESSES);
@@ -39,64 +39,60 @@ public class Swapping {
 		for(int run = 0; run < NUM_RUNS; run++)
 		{
 			reset(run);
-			for(int j=0;j<NUM_SECS;j++){
-				reset(run);
-				for(int sec=0;sec<NUM_SECS;sec++){
-					//Runs and removes finished processes
-					numProcesses = runAllProcesses(numProcesses);
-					
-					//compacts if at second 30
-					if (compaction && sec == 30)
-						compact();
-					
-					//adds processes to pMemList
-					//Adds processes until can't add first in queue
-					boolean addedProcess = true;
-					while(addedProcess){
-						addedProcess = false;
-						// If there are no programs in memory put it at the beginning.
-						if(pInMemList.size()==0){
-							pList.get(0).index = 0;
-							pInMemList.add(pList.remove(0));
-							addedProcess = true;
-							Collections.sort(pInMemList);
-						}
-						else{
-							boolean holeFound = false;
-							int holeIndex = 0;
-							int lastIndex = 0;
-							//Finds first large enough hole between processes.
-							for(Process p:pInMemList){
-								if(!holeFound)
-								{
-									int hole = p.index - lastIndex;
-									if(hole >= pList.get(0).size){
-										holeFound = true;
-										holeIndex = lastIndex;
-									}
-									lastIndex = p.index+p.size;
-								}
-							}
+			for(int sec=0;sec<NUM_SECS;sec++){
+				//Runs and removes finished processes
+				numProcesses = runAllProcesses(numProcesses);
+
+				//compacts if at second 30
+				if (compaction && sec == 30)
+					compact();
+
+				//adds processes to pMemList
+				//Adds processes until can't add first in queue
+				boolean addedProcess = true;
+				while(addedProcess){
+					addedProcess = false;
+					// If there are no programs in memory put it at the beginning.
+					if(pInMemList.size()==0){
+						pList.get(0).index = 0;
+						pInMemList.add(pList.remove(0));
+						addedProcess = true;
+						Collections.sort(pInMemList);
+					}
+					else{
+						boolean holeFound = false;
+						int holeIndex = 0;
+						int lastIndex = 0;
+						//Finds first large enough hole between processes.
+						for(Process p:pInMemList){
 							if(!holeFound)
 							{
-								//Finds hole between the last process and the end
-								int hole = SIZE_MEMORY - 1 - lastIndex;
+								int hole = p.index - lastIndex;
 								if(hole >= pList.get(0).size){
 									holeFound = true;
 									holeIndex = lastIndex;
 								}
-							}
-							if(holeFound){
-								pList.get(0).index = holeIndex;
-								pInMemList.add(pList.remove(0));
-								addedProcess = true;
-								Collections.sort(pInMemList);
+								lastIndex = p.index+p.size;
 							}
 						}
+						if(!holeFound)
+						{
+							//Finds hole between the last process and the end
+							int hole = SIZE_MEMORY - 1 - lastIndex;
+							if(hole >= pList.get(0).size){
+								holeFound = true;
+								holeIndex = lastIndex;
+							}
+						}
+						if(holeFound){
+							pList.get(0).index = holeIndex;
+							pInMemList.add(pList.remove(0));
+							addedProcess = true;
+							Collections.sort(pInMemList);
+						}
 					}
-					
-					printPInMemList("Running FF(compaction="+compaction+") Run "+run+" Second "+sec);
-				}
+				}					
+				printPInMemList("Running FF(compaction="+compaction+") Run "+run+" Second "+sec);				
 			}
 		}
 		System.out.println("Average number of processes processed: "+((double)numProcesses/NUM_RUNS));
@@ -121,14 +117,14 @@ public class Swapping {
 			for(int sec=0;sec<NUM_SECS;sec++){
 				//Runs and removes processes
 				numProcesses = runAllProcesses(numProcesses);
-				
+
 				//compacts if at second 30
 				if (compaction && sec == 30)
 					compact();
-				
+
 				//adds processes to pMemList
 				addProcessToSmallestHole();
-				
+
 				printPInMemList("Running BF(compaction="+compaction+") Run "+run+" Second "+sec);
 			}
 		}
@@ -142,14 +138,14 @@ public class Swapping {
 			for(int sec=0;sec<NUM_SECS;sec++){
 				//Runs and removes processes
 				numProcesses = runAllProcesses(numProcesses);
-				
+
 				//compacts if at second 30
 				if (compaction && sec == 30)
 					compact();
-				
+
 				//adds processes to pMemList
 				addProcessToLargestHole();
-				
+
 				printPInMemList("Running WF(compaction="+compaction+") Run "+run+" Second "+sec);
 			}
 		}
@@ -234,7 +230,7 @@ public class Swapping {
 					holeIndex = lastIndex;
 					smallestHole = hole;
 				}
-				
+
 				if(holeFound){
 					pList.get(0).index = holeIndex;
 					pInMemList.add(pList.remove(0));
@@ -278,7 +274,7 @@ public class Swapping {
 					holeIndex = lastIndex;
 					largestHole = hole;
 				}
-				
+
 				if(holeFound){
 					pList.get(0).index = holeIndex;
 					pInMemList.add(pList.remove(0));
