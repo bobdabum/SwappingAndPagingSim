@@ -14,6 +14,8 @@ public class Swapping {
 	private static ArrayList<Process> pInMemList = new ArrayList<Process>(NUM_PROCESSES);
 	
 	private static boolean printTrack = false;
+	private static int currIndex = 0;
+	private static double totalCompacted = 0;
 
 	public static void main(String args[]){
 		runFF(false);
@@ -47,7 +49,9 @@ public class Swapping {
 
 				//compacts if at second 30
 				if (compaction && sec == 30)
-					compact();
+					compact(sec);
+				//TODO print to show compaction
+				printPInMemList("Running FF(compaction="+compaction+") Run "+run+" Second "+sec);
 
 				//adds processes to pMemList
 				//Adds processes until can't add first in queue
@@ -117,17 +121,118 @@ public class Swapping {
 			System.out.println("Run "+run+" has ended \n \n");
 		}
 		System.out.println("Average number of processes processed: "+((double)numProcesses/NUM_RUNS));
+		if(compaction) {
+			System.out.println("Average mb copied is "+((double)totalCompacted/NUM_RUNS));
+		}
+		totalCompacted=0;
+		System.out.println("\n \n");
 	}
 	private static void runNF(boolean compaction){
 		int numProcesses = 0;
 		for(int run = 0; run < NUM_RUNS; run++)
 		{
 			reset(run);
-			for(int j=0;j<NUM_SECS;j++){
-				//TODO FINISH REST
+			for(int sec=0;sec<NUM_SECS;sec++){
+				//Runs and removes finished processes
+				numProcesses = runAllProcesses(numProcesses);
+
+				//compacts if at second 30
+				if (compaction && sec == 30)
+					compact(sec);
+				//TODO print to show compaction
+				printPInMemList("Running NF(compaction="+compaction+") Run "+run+" Second "+sec);
+
+				//adds processes to pMemList
+				//Adds processes until can't add first in queue
+				boolean addedProcess = true;
+				// This is the index of the last search.
+				//int currIndex = 0;
+				while(addedProcess){
+					addedProcess = false;
+					// If there are no programs in memory put it at the beginning.
+					if(pInMemList.size()==0){
+						pList.get(0).index = 0;
+						char currLetter = (char)(65 + pList.get(0).pNum%26);
+						System.out.println("Swapping process into memory. Process Name: "+currLetter+", Size: "+pList.get(0).size+ ", Duration: "+pList.get(0).duration);
+						pInMemList.add(pList.remove(0));
+						addedProcess = true;
+						Collections.sort(pInMemList);
+						printPInMemList("Running NF(compaction="+compaction+") Run "+run+" Second "+sec);
+						printTrack = false;
+					}
+					else{
+						boolean holeFound = false;
+						int holeIndex = 0;
+						int lastIndex = 0;
+						//Finds next large enough hole between processes starting from last search index.
+						for(Process p:pInMemList){
+							if(!holeFound)
+							{
+								if(p.index > currIndex)
+								{
+									int hole = p.index - lastIndex;
+									if(hole >= pList.get(0).size){
+										holeFound = true;
+										holeIndex = lastIndex;
+									}
+								}
+								lastIndex = p.index+p.size;
+							}
+						}
+						if(!holeFound)
+						{
+							//Finds hole between the last process and the end
+							int hole = SIZE_MEMORY - 1 - lastIndex;
+							if(hole >= pList.get(0).size){
+								holeFound = true;
+								holeIndex = lastIndex;
+							}
+							// Goes back to the start and finds next large enough hole between start and the last search index.
+							lastIndex = 0;
+							for(Process p:pInMemList){
+								if(!holeFound)
+								{
+									if(p.index <= currIndex)
+									{
+										hole = p.index - lastIndex;
+										if(hole >= pList.get(0).size){
+											holeFound = true;
+											holeIndex = lastIndex;
+										}
+									}
+									lastIndex = p.index+p.size;
+								}
+							}
+						}
+						if(holeFound){
+							currIndex = holeIndex;
+							pList.get(0).index = holeIndex;
+							char currLetter = (char)(65 + pList.get(0).pNum%26);
+							System.out.println("Swapping process into memory. Process Name: "+currLetter+", Size: "+pList.get(0).size+ ", Duration: "+pList.get(0).duration);
+							pInMemList.add(pList.remove(0));
+							addedProcess = true;
+							Collections.sort(pInMemList);
+							printPInMemList("Running NF(compaction="+compaction+") Run "+run+" Second "+sec);
+							printTrack = false;
+						}
+						else if(printTrack) {
+							//TODO print if process was removed
+							printPInMemList("Running NF(compaction="+compaction+") Run "+run+" Second "+sec);
+						}
+					}
+				}					
+				//printPInMemList("Running NF(compaction="+compaction+") Run "+run+" Second "+sec);	
+				printTrack=false;
 			}
+			currIndex = 0;
+			System.out.println("Run "+run+" has ended \n \n");
 		}
 		System.out.println("Average number of processes processed: "+((double)numProcesses/NUM_RUNS));
+		if(compaction) {
+			System.out.println("Average mb copied is "+((double)totalCompacted/NUM_RUNS));
+		}
+		totalCompacted=0;
+		System.out.println("\n \n");
 	}
 	private static void runBF(boolean compaction){
 		int numProcesses = 0;
@@ -141,7 +246,9 @@ public class Swapping {
 
 				//compacts if at second 30
 				if (compaction && sec == 30)
-					compact();
+					compact(sec);
+				//TODO print to show compaction
+				printPInMemList("Running BF(compaction="+compaction+") Run "+run+" Second "+sec);
 
 				//adds processes to pMemList
 				addProcessToSmallestHole(compaction, run, sec);
@@ -155,6 +262,11 @@ public class Swapping {
 			System.out.println("Run "+run+" has ended \n \n");
 		}
 		System.out.println("Average number of processes processed: "+((double)numProcesses/NUM_RUNS));
+		if(compaction) {
+			System.out.println("Average mb copied is "+((double)totalCompacted/NUM_RUNS));
+		}
+		totalCompacted=0;
+		System.out.println("\n \n");
 	}
 	private static void runWF(boolean compaction){
 		int numProcesses = 0;
@@ -167,7 +279,9 @@ public class Swapping {
 
 				//compacts if at second 30
 				if (compaction && sec == 30)
-					compact();
+					compact(sec);
+				//TODO print to show compaction
+				printPInMemList("Running WF(compaction="+compaction+") Run "+run+" Second "+sec);
 
 				//adds processes to pMemList
 				addProcessToLargestHole(compaction, run, sec);
@@ -180,6 +294,11 @@ public class Swapping {
 			System.out.println("Run "+run+" has ended \n \n");
 		}
 		System.out.println("Average number of processes processed: "+((double)numProcesses/NUM_RUNS));
+		if(compaction) {
+			System.out.println("Average mb copied is "+((double)totalCompacted/NUM_RUNS));
+		}
+		totalCompacted=0;
+		System.out.println("\n \n");
 	}
 	private static void printPInMemList (String input) {
 		String toPrint = input + ": ";
@@ -207,12 +326,18 @@ public class Swapping {
 
 		System.out.println(toPrint);
 	}
-	private static void compact(){
+	private static void compact(int sec){
 		int newIndex = 0;
+		int totalMbMoved = 0;
 		for(Process p: pInMemList){
+			if(p.index != newIndex) {
+				totalMbMoved += p.size;
+			}
 			p.setIndex(newIndex);
 			newIndex += p.size;
 		}
+		System.out.println("Compacting memory at "+sec+" seconds. Total Mb copied: "+totalMbMoved);
+		totalCompacted += totalMbMoved;
 	}
 	private static int runAllProcesses(int numProcesses){
 		for(int k = 0; k< pInMemList.size();k++){
